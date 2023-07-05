@@ -28,33 +28,36 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 1:30pm-3:00pm | | Slides | |
+| 1:30pm-1:45pm | Introduction | Slides | |
+| 1:45pm-2:30pm | Using BioData Catalyst powered by Seven Bridges | Slides | |
+| 2:30pm-3:00pm | Intro to Genomic Data Structure Format (Lecture) | Slides | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-5:00pm | | Slides | |
+| 3:30pm-4:15pm | Intro to Genomic Data Structure Format (Exercise) | | .Rmd .html |
+| 4:15pm-5:00pm | Association Tests: Background | Slides | |
 
 **Thursday, July 27th**
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-10:00am | | Slides | |
+| 8:30am-10:00am | Single Variant Association Tests | Slides | .Rmd .html |
 | 10:00am-10:30am | _Coffee Break_ | | |
-| 10:30am-12:00pm | | Slides | |
+| 10:30am-12:00pm | Population Structure and Relatedness Inference for Association Studies | Slides | .Rmd .html |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
-| 1:30pm-3:00pm | | Slides | |
+| 1:30pm-3:00pm | Mixed Model Association Tests | Slides | .Rmd .html |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-5:00pm | | Slides | |
+| 3:30pm-5:00pm | R shiny Apps for Exploring Results Demo | Slides | .Rmd .html |
 
 **Friday, July 28th**
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-10:00am | | Slides | |
+| 8:30am-10:00am | Recent Findings for WGS Studies | Slides | |
 | 10:00am-10:30am | _Coffee Break_ | | |
-| 10:30am-12:00pm | | Slides | |
+| 10:30am-12:00pm | Multiple Variant Association Tests | Slides | .Rmd .html |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
-| 1:30pm-3:00pm | | Slides | |
+| 1:30pm-3:00pm | Advanced Annotation Strategies for Association Testing | Slides | .Rmd .html |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-5:00pm | | Slides | |
+| 3:30pm-5:00pm | Annotation Explorer Demo | Slides | |
 
 ## R packages used
 
