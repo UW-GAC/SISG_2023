@@ -1,0 +1,329 @@
+# 3. Population Structure and Relatedness Inference
+
+Population structure due to genetic ancestry and genetic correlation due to sample relatedness are important factors to consider when performing association tests as their presence can lead to mis-calibration of test statistics and false positive associations. This tutorial demonstrates how to perform population structure and relatedness inference using the [GENESIS](https://bioconductor.org/packages/release/bioc/html/GENESIS.html) and [SNPRelate](https://www.bioconductor.org/packages/release/bioc/html/SNPRelate.html) R/Bioconductor packages. We will use the results of this inference to improve our association testing in the following Mixed Models tutorial.
+
+## LD-pruning
+
+We generally advise that population structure and relatedness inference be performed using a set of (nearly) independent genetic variants. To find this set of variants, we perform linkage-disequilibrium (LD) pruning on the study sample set. We typically use an LD threshold of `r^2 < 0.1` to select variants. We use the [SNPRelate](https://github.com/zhengxwen/SNPRelate) package to perform LD-pruning with GDS files. 
+
+```{r ld-pruning, message = FALSE}
+library(SeqArray)
+repo_path <- "https://github.com/UW-GAC/SISG_2022/raw/main"
+
+# use a GDS file with all chromosomes
+if (!dir.exists("data")) dir.create("data")
+gdsfile <- "data/1KG_phase3_subset.gds"
+if (!file.exists(gdsfile)) download.file(file.path(repo_path, gdsfile), gdsfile)
+gdsfmt::showfile.gds(closeall=TRUE) # make sure file is not already open
+gds <- seqOpen(gdsfile)
+
+# run LD pruning
+library(SNPRelate)
+set.seed(100) # LD pruning has a random element; so make this reproducible
+snpset <- snpgdsLDpruning(gds, 
+                          method="corr", 
+                          slide.max.bp=10e6, 
+                          ld.threshold=sqrt(0.1))
+
+# how many variants on each chr?
+sapply(snpset, length)
+
+# get the full list of LD-pruned variants 
+pruned <- unlist(snpset, use.names=FALSE)
+length(pruned)
+```
+
+## Computing a GRM
+
+We can use the [SNPRelate](https://github.com/zhengxwen/SNPRelate) package to compute a Genetic Relationship matrix (GRM) using GDS files.  A GRM captures genetic correlation among samples due to both distant ancestry (i.e. population structure) and recent kinship (i.e. familial relatedness) in a single matrix.
+
+SNPRelate offers several algorithms for computing a GRM, including the commonly-used GCTA [Yang et al 2011](https://www.ncbi.nlm.nih.gov/pubmed/21167468) (`method = "GCTA"`) and allelic matching based estimators described by [Weir and Goudet 2017](https://www.ncbi.nlm.nih.gov/pubmed/28550018) (`method = "IndivBeta"`).
+
+```{r grm}
+# compute the GRM using the GCTA method
+library(SNPRelate)
+grm <- snpgdsGRM(gds, method="GCTA", snp.id = pruned)
+names(grm)
+dim(grm$grm)
+
+# look at the top corner of the matrix
+grm$grm[1:5,1:5]
+```
+
+
+## De-convoluting ancestry and relatedness
+
+To disentangle distant ancestry (i.e. population structure) from recent kinship (i.e. familial relatedness), we implement the analysis described in [Conomos et al., 2016](https://www.cell.com/ajhg/fulltext/S0002-9297(15)00496-6). This approach uses the [KING-robust](http://www.ncbi.nlm.nih.gov/pubmed/20926424), [PC-AiR](http://www.ncbi.nlm.nih.gov/pubmed/25810074), and [PC-Relate](http://www.ncbi.nlm.nih.gov/pubmed/26748516) methods.
+
+#### KING-robust
+
+Step 1 is to get initial kinship estimates using [KING-robust](http://www.ncbi.nlm.nih.gov/pubmed/20926424), which is robust to discrete population structure but not ancestry admixture. KING-robust will be able to identify close relatives (e.g. 1st and 2nd degree) reliably, but may identify spurious pairs or miss more distant pairs of relatives in the presence of admixture. KING is available as its own software, but the KING-robust algorithm is also available in SNPRelate via the function `snpgdsIBDKING`.
+
+```{r king}
+# run KING-robust
+king <- snpgdsIBDKING(gds, snp.id=pruned)
+names(king)
+
+# extract the kinship estimates
+kingMat <- king$kinship
+colnames(kingMat) <- rownames(kingMat) <- king$sample.id
+dim(kingMat)
+# look at the top corner of the matrix
+kingMat[1:5,1:5]
+```
+
+We extract pairwise kinship estimates and IBS0 values (the proportion of variants for which the pair of indivdiuals share 0 alleles identical by state) to plot. We use a hexbin plot to visualize the relatedness for all pairs of samples.
+
+```{r king_plot}
+kinship <- snpgdsIBDSelection(king)
+head(kinship)
+
+library(ggplot2)
+ggplot(kinship, aes(IBS0, kinship)) +
+    geom_hline(yintercept=2^(-seq(3,9,2)/2), linetype="dashed", color="grey") +
+    geom_hex(bins = 100) +
+    ylab("kinship estimate") +
+    theme_bw()
+```
+
+We see a few parent-offspring, full sibling, 2nd degree, and 3rd degree relative pairs. The abundance of negative estimates represent pairs of individuals who have ancestry from different populations -- the magnitude of the negative relationship is informative of how different their ancestries are; more on this below.
+
+#### PC-AiR
+
+The next step is [PC-AiR](http://www.ncbi.nlm.nih.gov/pubmed/25810074), which provides robust population structure inference in samples with kinship and pedigree structure. PC-AiR is available in the GENESIS package via the function `pcair`.
+
+First, PC-AiR partitions the full sample set into a set of mutually unrelated samples that is maximally informative about all ancestries in the sample (i.e. the unrelated set) and their relatives (i.e. the related set). We use a 3rd degree kinship threshold (`kin.thresh = 2^(-9/2)`), which corresponds to first cousins -- this defines anyone less related than first cousins as "unrelated". We use the negative KING-robust estimates as "ancestry divergence" measures (`divMat`) to identify pairs of samples with different ancestry -- we preferentially select individuals with many negative estimates for the unrelated set to ensure ancestry representation. For now, we also use the KING-robust estimates as our kinship measures (`kinMat`); more on this below.
+
+Once the unrelated and related sets are identified, PC-AiR performs a standard Principal Component Analysis (PCA) on the unrelated set of individuals and then projects the relatives onto the PCs. Under the hood, PC-AiR uses the SNPRelate package for efficient PC computation and projection.
+
+```{r pcair1}
+# run PC-AiR
+library(GENESIS)
+pca <- pcair(gds,
+            kinobj = kingMat,
+            kin.thresh = 2^(-9/2),
+            divobj = kingMat,
+            div.thresh = -2^(-9/2),
+            snp.include = pruned)
+
+names(pca)
+
+# the unrelated set of samples
+length(pca$unrels)
+head(pca$unrels)
+
+# the related set of samples
+length(pca$rels)
+head(pca$rels)
+
+# extract the top 10 PCs and make a data.frame
+pcs <- data.frame(pca$vectors[,1:10])
+colnames(pcs) <- paste0('PC', 1:10)
+pcs$sample.id <- pca$sample.id
+dim(pcs)
+head(pcs)
+
+# save output
+save(pcs, file="data/pcs.RData")
+```
+
+We'd like to determine which PCs are ancestry informative. To do this we look at the PCs in conjunction with reported population information for the 1000 Genomes samples. This information is stored in the `AnnotatedDataFrame` we created in the prior tutorial. We make a parallel coordinates plot, color-coding by 1000 Genomes population.
+
+```{r pcair1_parcoord, message = FALSE}
+library(Biobase)
+annotfile <- "data/sample_phenotype_annotation.RData"
+if (!file.exists(annotfile)) download.file(file.path(repo_path, annotfile), annotfile)
+annot <- get(load(annotfile))
+
+pc.df <- merge(pcs, pData(annot)[,c("sample.id", "pop")], by = "sample.id")
+
+library(GGally)
+library(RColorBrewer)
+pop.cols <- setNames(brewer.pal(12, "Paired"),
+                 c("ACB", "ASW", "CEU", "GBR", "CHB", "JPT", "CLM", "MXL", "LWK", "YRI", "GIH", "PUR"))
+ggparcoord(pc.df, columns=2:11, groupColumn="pop", scale="uniminmax") +
+    scale_color_manual(values=pop.cols) +
+    xlab("PC") + ylab("")
+```
+
+
+#### PC-Relate
+
+The next step is [PC-Relate](http://www.ncbi.nlm.nih.gov/pubmed/26748516), which provides accurate kinship inference, even in the presence of population structure and ancestry admixture, by conditioning on ancestry informative PCs. As we saw above, PCs 1-5 separate populations in our study, so we condition on PCs 1-5 in our PC-Relate analysis. PC-Relate can be performed using the `pcrelate` function in GENESIS, which expects a `SeqVarIterator` object for the genotype data. The `training.set` argument allows for specification of which samples to use to "learn" the ancestry adjustment -- we recommend the unrelated set from the PC-AiR analysis.
+
+(NOTE: this will take a few minutes to run).
+
+```{r pcrelate1}
+seqResetFilter(gds, verbose=FALSE)
+library(SeqVarTools)
+seqData <- SeqVarData(gds)
+
+# filter the GDS object to our LD-pruned variants
+seqSetFilter(seqData, variant.id=pruned)
+iterator <- SeqVarBlockIterator(seqData, verbose=FALSE)
+
+pcrel <- pcrelate(iterator,
+                  pcs=pca$vectors[,c(1:5)],
+                  training.set=pca$unrels)
+names(pcrel)
+
+# relatedness between pairs of individuals
+dim(pcrel$kinBtwn)
+head(pcrel$kinBtwn)
+
+# self-kinship estimates
+dim(pcrel$kinSelf)
+head(pcrel$kinSelf)
+
+# save output
+save(pcrel, file="data/pcrelate.RData")
+```
+
+We plot the pairwise kinship estimates againts the IBD0 (`k0`) estimates (the proportion of variants for which the pair of individuals share 0 alleles identical by descent). We use a hexbin plot to visualize the relatedness for all pairs of samples.
+
+```{r pcrelate1_plot}
+ggplot(pcrel$kinBtwn, aes(k0, kin)) +
+    geom_hline(yintercept=2^(-seq(3,9,2)/2), linetype="dashed", color="grey") +
+    geom_hex(bins = 100) +
+    geom_abline(intercept = 0.25, slope = -0.25) +
+    ylab("kinship estimate") +
+    theme_bw()
+```
+
+We see that the PC-Relate relatedness estimates for unrelated pairs (i.e. kin ~ 0 and k0 ~ 1) are much closer to expectation than those from KING-robust.
+
+
+### Advanced Notes
+
+In small samples (such as this one), we recommend performing a second iteration of PC-AiR and PC-Relate. Using the first iteration of PC-Relate ancestry-adjusted kinship estimates, we can often better partition our sample into unrelated and related sets, which leads to better ancestry PCs from PC-AiR and better relatedness estimates from PC-Relate. The steps to perform the second iteration are:
+
+1. Perform a second PC-AiR analysis using the PC-Relate kinship matrix as the kinship estimates. Still use the (original) KING-robust matrix for the ancestry divergence estimates.
+2. Perform a second PC-Relate analysis using the new PC-AiR PCs to adjust for population structure.
+
+
+In large samples (such as TOPMed), the KING-robust and PC-Relate analyses can be very time consuming, so we suggest the following alternative procedure for deconvoluting ancestry and relatedness:
+
+1. Use the [KING-IBDseg method](https://www.kingrelatedness.com/manual.shtml#IBDSEG) to estimate kinship for all pairs of individuals. This method uses a fast algorithm to approximate IBD segments based on identity by state and works well in the presence of ancestry admixture -- in our experience, it gives very similar results to PC-Relate. The software to run KING-IBDseg uses PLINK files, but we've written a `KING IBDseg` application on the BioData Catalyst powered by Seven Bridges platform that will use GDS files as input (it does a conversion from GDS to PLINK).
+2. Perform a PC-AiR analysis to infer population structure using the KING-IBDseg estimates as the kinship estimates and using no ancestry divergence measures (in large samples, the PC-AiR algorithm works well even without the ancestry divergence).
+
+
+### Exercise 3.1 (Application)
+
+Use the `LD Pruning` app on the BioData Catalyst powered by Seven Bridges platform to perform LD pruning on the example 1000 Genomes GDS files you created previously. The steps to perform this analysis are as follows:
+
+- Copy the app to your project if it is not already there:
+  - Click: Public Gallery > Apps > Browse
+  - Search for `LD Pruning`
+  - Click: Copy > Select your project > Copy
+- Run the analysis in your project:
+  - Click: Apps > `LD Pruning` > Run
+  - Specify the Inputs:
+    - GDS Files: `1KG_phase3_subset_chr<CHR>.gds` (select all 22 chromosomes)
+  - Specify the App Settings:
+    - Autosomes only: TRUE
+    - LD |r| threshold: 0.32 ($\approx r^2 = 0.1$)
+    - MAF threshold: 0 (in practice we usually use 0.01 or 0.05, but our example data doesn't have many variants)
+    - Output prefix: "1KG_phase3_subset" (or any other string to name the output file)
+  - Click: Run
+  
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project. Use the "View stats & logs" button to check on the status of your tasks. Click on the bar that says "ld_pruning", click "View Logs", and click one of the "ld_pruning" folders (there's one per chromosome). In here you can see detailed logs of the job; take a look at the `job.out.log` and `job.err.log` -- these can be useful for debugging issues. 
+
+The output of this analysis will be a single file (`<output prefix>_pruned.gds`) with the genotype data from the LD pruned variants across all 22 chromosomes.
+
+You can find the expected output of this analysis by looking at the existing task `02. 1KG LD Pruning` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to move to the next exercise.
+
+
+### Exercise 3.2 (Application)
+
+Use the `KING robust` app on the BioData Catalyst powered by Seven Bridges platform to perform a KING-robust analysis of the example 1000 Genomes data using the LD pruned variants. The steps to perform this analysis are as follows:
+
+- Copy the app to your project if it is not already there:
+  - Click: Public Gallery > Apps > Browse
+  - Search for `KING robust`
+  - Click: Copy > Select your project > Copy
+- Run the analysis in your project:
+  - Click: Apps > `KING robust` > Run
+  - Specify the Inputs:
+    - GDS file: `1KG_phase3_subset_pruned.gds` (has pruned variants from all 22 chromosomes)
+  - Specify the App Settings:
+    - kinship_plots > Kinship plotting threshold: 0
+    - Output prefix: "1KG_phase3_subset" (or any other string to name the output file)
+  - Click: Run
+  
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed.
+
+The output of this analysis will be a `<output_prefix>_king_robust.gds` file that has the kinship estimates and a `<output_prefix>_king_robust_all.pdf` with the plot of estimated kinship vs. IBS0. Look at the kinship plot -- how many 1st degree relative pairs are identified? How many 2nd degree relative pairs are identified?
+
+You can find the expected output of this analysis by looking at the existing task `03. 1KG King Robust` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to move to the next exercise.
+
+
+### Solution 3.2 (Application)
+
+From the kinship plot, we can see that there are 8 1st degree relative pairs (6 parent-offspring; 2 full sibling) and 4 2nd degree relative pairs identified. 
+
+
+### Exercise 3.3 (Application)
+
+Use the `PC-AiR` app on the BioData Catalyst powered by Seven Bridges platform to perform a PC-AiR analysis of the example 1000 Genomes data using the LD pruned variants. Use the KING-robust kinship estimates as both the kinship and divergence measures. The steps to perform this analysis are as follows:
+
+- Copy the app to your project if it is not already there:
+  - Click: Public Gallery > Apps > Browse
+  - Search for `PC-AiR`
+  - Click: Copy > Select your project > Copy
+- Run the analysis in your project:
+  - Click: Apps > `PC-AiR` > Run
+  - Specify the Inputs:
+    - Pruned GDS File: `1KG_phase3_subset_pruned.gds` (has pruned variants from all 22 chromosomes)
+    - Kinship File: `1KG_phase3_subset_king_robust.gds` 
+    - Divergence File: `1KG_phase3_subset_king_robust.gds`
+    - Phenotype file: `sample_phenotype_annotation.RData`
+  - Specify the App Settings:
+    - pca_byrel > Number of PCs: 10
+    - pca_plots > Group: pop (sample variable for coloring output PCA)
+    - pca_plots > Number of PCs: 10
+    - PC-variant correlation > Run PC-variant correlation: FALSE (extra diagnostic step that takes a while to run)
+    - Output prefix: "1KG_phase3_subset" (or any other string to name the output file)
+  - Click: Run
+  
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed.
+
+The output of this analysis is a "<output_prefix>_pca.RData" object with the PC values and several PC plots. Look at the parallel coordinates plot ("`<output_prefix>_parcoord.pdf`") generated by the task. How many PCs appear to reflect population structure in the sample? This will determine how many PCs you should use to adjust PC-Relate in the next exercise.
+
+You can find the expected output of this analysis by looking at the existing task `04. 1KG PC-AiR` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to move to the next exercise.
+
+### Solution 3.3 (Application)
+
+From the parallel coordinates plot, we can see that PCs 1-4 and 6 appear to reflect population structure (PC5 appears to be driven by a single individual). We will use the first 6 PCs to adjust for population structure in the PC-Relate analysis in the next exercise.
+
+
+### Exercise 3.4 (Application)
+
+Use the `PC-Relate` app on the BioData Catalyst powered by Seven Bridges platform to perform a PC-Relate analysis of the example 1000 Genomes data using the LD pruned variants. Use the PC-AiR PCs to adjust for population structure. The steps to perform this analysis are as follows:
+
+- Copy the app to your project if it is not already there:
+  - Click: Public Gallery > Apps > Browse
+  - Search for `PC-Relate`
+  - Click: Copy > Select your project > Copy
+- Run the analysis in your project:
+  - Click: Apps > `PC-Relate` > Run
+  - Specify the Inputs:
+    - GDS File: `1KG_phase3_subset_pruned.gds` (has pruned variants from all 22 chromosomes)
+    - PCA file: `1KG_phase3_subset_pca.RData`
+  - Specify the App Settings:
+    - pcrelate_beta > Number of PCs: 6
+    - pcrelate > Number of PCs: 6
+    - pcrelate > Return IBD probabilities?: TRUE
+    - kinship_plots > Kinship plotting threshold: 0
+    - kinship_plots > Return IBD probabilities?: TRUE
+    - Output prefix: "1KG_phase3_subset" (or any other string to name the output file)
+  - Click: Run
+  
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed.
+
+The output of this analysis is a `<output_prefix>_pcrelate.RData` file that contains the PC-Relate relatedness estimates, a `<output_prefix>_pcrelate_Matrix.RData` file that contains a sparse matrix of kinship estimates (more on this in the Mixed Model tutorial), and a `<output_prefix>_pcrelate_all.pdf` with the plot of estimated kinship vs. k0. Look at the kinship plot -- how many 1st degree relative pairs are identified? How many 2nd degree relative pairs are identified?
+
+You can find the expected output of this analysis by looking at the existing task `05. 1KG PC-Relate` in the Tasks menu of your Project. 
+
+### Solution 3.4 (Application)
+
+From the kinship plot, you can see that there are 8 1st degree relative pairs (6 parent-offspring; 2 full sibling) and 4 2nd degree relative pairs identified. 
