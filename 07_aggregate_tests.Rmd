@@ -1,0 +1,345 @@
+# 7. Aggregate Association Tests
+
+Multiple-variant association tests, which are commonly used for testing rare variants in aggregate, can be used to identify when variants in a genomic region (e.g. a gene), potentially with certain properties defined by variant annotation, are associated with a phenotype of interest. Under certain assumptions, these aggregate tests can improve statistical power to detect association when single variant tests are under-powered and/or poorly calibrated. This tutorial demonstrates how to perform aggregate multiple-variant association tests using the [GENESIS](https://bioconductor.org/packages/release/bioc/html/GENESIS.html) R/Bioconductor package. 
+
+## Aggregation Units for Association Testing
+
+In this tutorial, we will be using pre-computed aggregation units based on genes as defined in genome build GRCh37/hg19. It is important to use aggregation units based on the genome build consistent with your sample genotype data. These gene-based units include SNVs from all chromosomes (no indels). Each genic unit was specified to include the set of SNVs falling within GENCODE-defined gene boundaries and the 20 kb flanking regions upstream and downstream of that range. Variants in the aggregation units are not filtered by CADD score or consequence.
+
+The provided aggregation units are defined in an R data.frame compatible with the GENESIS association testing workflows. Each row of the data.frame specifies a variant (chr, pos, ref, alt) and indicates which aggregation unit it belongs to via the `group_id` column. Note that a variant can be assigned to multiple groups by specifying it in multiple rows with different group identifiers.
+
+Begin by loading the aggregation units:
+
+```{r agg_unit}
+repo_path <- "https://github.com/UW-GAC/SISG_2022/raw/main"
+if (!dir.exists("data")) dir.create("data")
+aggfile <- "data/variants_by_gene.RData"
+if (!file.exists(aggfile)) download.file(file.path(repo_path, aggfile), aggfile)
+aggunit <- get(load(aggfile))
+dim(aggunit)
+head(aggunit)
+
+# how many genes (aggregation units) per chromosome?
+table(aggunit$chr)
+```
+
+*NOTE: because our example data has a limited number of variants, we use aggregation units that are several consecutive genes grouped together -- the grouping is not meaningful but gives us aggregation units with more variants so that we can illustrate the tests below.*
+
+```{r agg_unit_2, message=FALSE}
+# load the example aggregation units
+aggfile <- "data/agg_units_example.RData"
+if (!file.exists(aggfile)) download.file(file.path(repo_path, aggfile), aggfile)
+aggunit <- get(load(aggfile))
+dim(aggunit)
+head(aggunit)
+```
+
+## Aggregate Association Tests
+
+We can perform burden, SKAT, SKAT-O, fastSKAT, or SMMAT tests using the `assocTestAggregate` function from GENESIS. 
+
+#### Prepare the Data
+
+First, we load the `AnnotatedDataFrame` with the phenotype data, open a connection to the GDS file with the genotype data, and create our `SeqVarData` object linking the two. This is the same as the previous tutorials.
+
+```{r}
+# open the GDS file
+library(SeqVarTools)
+
+gdsfile <- "data/1KG_phase3_subset_chr1.gds"
+if (!file.exists(gdsfile)) download.file(file.path(repo_path, gdsfile), gdsfile)
+gdsfmt::showfile.gds(closeall=TRUE) # make sure file is not already open
+gds <- seqOpen(gdsfile)
+
+# sample annotation file
+annotfile <- "data/sample_phenotype_pcs.RData"
+if (!file.exists(annotfile)) download.file(file.path(repo_path, annotfile), aggfile)
+annot <- get(load(annotfile))
+
+# make the seqVarData object
+seqData <- SeqVarData(gds, sampleData=annot)
+```
+
+When performing aggregate tests, we define a `SeqVarListIterator` object where each list element is an aggregation unit. The constructor expects a `GRangesList`, so we use the function `aggregateGRangesList` to convert our single dataframe to the required format. This function can account for multiallelic variants (the same chromosome, position, and ref, but different alt alleles).
+
+```{r aggVarList, message=FALSE}
+library(GenomicRanges)
+aggregateGRangesList <- function(variants) {
+    stopifnot(all(c("group_id", "chr", "pos") %in% names(variants)))
+    groups <- unique(variants$group_id)
+    cols <- setdiff(names(variants), c("group_id", "chr", "pos"))
+    GRangesList(lapply(setNames(groups, groups), function(g) {
+        x <- variants[variants$group_id == g,]
+        gr <- GRanges(seqnames=x$chr, ranges=IRanges(start=x$pos, width=1))
+        mcols(gr) <- x[,cols]
+        gr
+    }))
+}
+
+# create the GRangesList object
+aggVarList <- aggregateGRangesList(aggunit)
+length(aggVarList)
+head(names(aggVarList))
+aggVarList[[1]]
+
+# construct the iterator using the SeqVarListIterator function
+iterator <- SeqVarListIterator(seqData, variantRanges=aggVarList, verbose=FALSE)
+```
+
+Finally, we need to load the null model we fit earlier. We use the same null model that was used for our single variant association tests. 
+
+```{r}
+# load the null model
+nullmodfile <- "data/null_mixed_model_height.RData"
+if (!file.exists(nullmodfile)) download.file(file.path(repo_path, nullmodfile), nullmodfile)
+nullmod <- get(load(nullmodfile))
+```
+
+
+#### Run the Burden Test 
+
+First, we perform a burden test. We restrict the test to variants with alternate allele frequency < 0.1. (For real data, this threshold would be lower, perhaps 0.05 or 0.01.) We use a uniform weighting scheme -- i.e. every variant gets the same weight (a Beta(1,1) distribution is a uniform distribution). The `assocTestAggregate` function iterates over all aggregation units in the `SeqVarListIterator` object. 
+
+```{r assoc_burden}
+# run the burden test
+library(GENESIS)
+assoc <- assocTestAggregate(iterator, 
+                            null.model = nullmod, 
+                            test = "Burden", 
+                            AF.max = 0.1, 
+                            weight.beta = c(1,1))
+names(assoc)
+```
+
+The function returns the primary results for each aggregation unit in one table (`results`). It also returns a list of tables that contain the variant details for each aggregation unit tested (`variantInfo`).
+
+```{r}
+# results for each aggregation unit
+class(assoc$results)
+dim(assoc$results)
+head(assoc$results)
+
+# variant info per aggregation unit
+class(assoc$variantInfo)
+head(assoc$variantInfo)
+```
+
+We can make a QQ plot of the burden p-values from the main results table
+
+```{r}
+library(ggplot2)
+qqPlot <- function(pval) {
+    pval <- pval[!is.na(pval)]
+    n <- length(pval)
+    x <- 1:n
+    dat <- data.frame(obs=sort(pval),
+                      exp=x/n,
+                      upper=qbeta(0.025, x, rev(x)),
+                      lower=qbeta(0.975, x, rev(x)))
+    
+    ggplot(dat, aes(-log10(exp), -log10(obs))) +
+        geom_line(aes(-log10(exp), -log10(upper)), color="gray") +
+        geom_line(aes(-log10(exp), -log10(lower)), color="gray") +
+        geom_point() +
+        geom_abline(intercept=0, slope=1, color="red") +
+        xlab(expression(paste(-log[10], "(expected P)"))) +
+        ylab(expression(paste(-log[10], "(observed P)"))) +
+        theme_bw()
+}    
+
+qqPlot(assoc$results$Score.pval)
+```
+
+#### Run the SKAT Test 
+
+We can also perform a SKAT test. This time, we will use the Wu weights (i.e. drawn from a Beta(1,25) distribution), which give larger weights to rarer variants (note the different weight values in the `variantInfo` output).
+
+```{r assoc_skat}
+# reset the iterator to the first window
+resetIterator(iterator, verbose = FALSE)
+
+# run the SKAT test
+assoc <- assocTestAggregate(iterator, 
+                            null.model = nullmod, 
+                            test = "SKAT", 
+                            AF.max = 0.1, 
+                            weight.beta = c(1,25))
+
+# results for each aggregation unit
+head(assoc$results)
+
+# variant info per aggregation unit 
+head(assoc$variantInfo)
+
+# make a QQ plot of the SKAT test p-values
+qqPlot(assoc$results$pval)
+```
+
+#### Run the SMMAT Test
+
+We can also perform a SMMAT test, which efficiently combines the p-values from the burden test and an asymptotically independent adjusted "SKAT-type" test (it's essentially a SKAT test conditional on the burden) using Fisher's method. This method is conceptually similar to the SKAT-O test but much faster computationally. 
+
+```{r assoc_smmat}
+# reset the iterator to the first window
+resetIterator(iterator, verbose = FALSE)
+
+# run the SKAT test
+assoc <- assocTestAggregate(iterator, 
+                            null.model = nullmod, 
+                            test = "SMMAT", 
+                            AF.max = 0.1, 
+                            weight.beta = c(1,25))
+
+# results for each aggregation unit
+head(assoc$results)
+
+# variant info per aggregation unit
+head(assoc$variantInfo)
+```
+
+The function returns the p-values from the burden test (`pval_burden`), the adjusted SKAT-type test (`pval_theta`), and the combined p-value (`pval_SMMAT`). The combined p-value is the one to use for assessing significance. 
+
+```{r}
+# make a QQ plot of the SMMAT test p-values
+qqPlot(assoc$results$pval_SMMAT)
+```
+
+
+
+### Exercise 6.1 (Data Studio)
+
+Perform a SKAT test for the outcome "status". Adjust your model for the covariates sex, age, study, and ancestry PCs. Also include the kinship matrix as a random effect to adjust for relatedness. When performing your SKAT test, use all variants with alternate allele frequency < 20%, and use the Wu weights to give larger weights to rarer variants. Use the same aggregation units as in the examples. Which aggregation units have the smallest and largest cumulative alternate allele count (`n.alt`), and what are the values? Make a QQ plot of the SKAT p-values. 
+
+```{r}
+# your solution here 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+```
+
+### Solution 6.1 (Data Studio)
+
+Perform a SKAT test for the outcome "status". Adjust your model for the covariates sex, age, study, and ancestry PCs. Also include the kinship matrix as a random effect to adjust for relatedness. When performing your SKAT test, use all variants with alternate allele frequency < 20%, and use the Wu weights to give larger weights to rarer variants. Use the same aggregation units as in the examples. Which aggregation units have the smallest and largest cumulative alternate allele count (`n.alt`), and what are the values? Make a QQ plot of the SKAT p-values. 
+
+The first step is to fit our null model -- since our outcome, status, is a binary variable, we must fit a logistic mixed model using the `family = binomial` argument. Recall that we actually fit this null model in Exercise 4.1, so we just load those results (refer back to Solution 4.1 to see the code for fitting this null model). 
+
+```{r exercise_aggregate_1}
+# load our previously fitted null model
+nullmodfile <- "data/null_mixed_model_status.RData"
+if (!file.exists(nullmodfile)) download.file(file.path(repo_path, nullmodfile), nullmodfile)
+nullmod.status <- get(load(nullmodfile))
+```
+
+The second step is to create our `SeqVarListIterator` object. Since we've already created the iterator object, we can just reset it using the `resetIterator` function (refer back to the code above for how to construct the iterator). 
+
+```{r exercise_aggregate_2}
+# reset the iterator
+resetIterator(iterator, verbose = FALSE)
+```
+
+The third step is to perform the SKAT test using the `assocTestAggregate` function -- we can set the maximum alternate allele frequency with the `AF.max` argument, and we can set the variant weights with the `weight.beta` argument.
+
+```{r exercise_aggregate_3}
+# perform the SKAT test
+assoc <- assocTestAggregate(iterator, 
+                            null.model = nullmod.status, 
+                            test = "SKAT", 
+                            AF.max = 0.2, 
+                            weight.beta = c(1,25))
+
+```
+
+Lastly, we can look at the output and make out QQ plot
+
+```{r exercise_aggregate_4}
+# results for each window
+head(assoc$results)
+
+# smallest cumulative alternate allele count
+assoc$results[which.min(assoc$results$n.alt),]
+# largest cumulative alternate allele count
+assoc$results[which.max(assoc$results$n.alt),]
+
+# make a QQ plot of the SKAT test p-values
+qqPlot(assoc$results$pval)
+```
+
+We see that unit36 only has a cumulative alternate allele count of 2 -- there is only 1 variant (`n.site`) in the aggregation unit and only 2 samples who are carriers of any alternate alleles (`n.sample.alt`). In practice, you may want to exclude aggregation units with a very small (e.g. < 5) cumulative alternate allele count, as the results for these aggregation units are often unreliable (similar to how we exclude very low MAC variants from single variant test results). 
+
+```{r assoc_close2}
+seqClose(seqData)
+```
+
+
+### Exercise 6.2 (Application)
+
+Use the `GENESIS Aggregate Association Testing` app on the BioData Catalyst powered by Seven Bridges platform to perform a SMMAT test for height using the null model previously fit in Exercise 4.2. Only include variants with alternate allele frequency < 10% and use the Wu weights to upweight rarer variants. Use the genotype data in the genome-wide GDS files you created previously. The steps to perform this analysis are as follows:
+
+- Copy the app to your project if it is not already there:
+  - Click: Public Gallery > Apps > Browse
+  - Search for `GENESIS Aggregate Association Testing`
+  - Click: Copy > Select your project > Copy
+- Run the analysis in your project:
+  - Click: Apps > `GENESIS Aggregate Association Testing` > Run
+  - Specify the Inputs:
+    - GDS files: `1KG_phase3_subset_chr<CHR>.gds` (select all 22 chromosomes)
+    - Null model file: `1KG_height_null_model.RData`
+    - Phenotype file: `1KG_height_phenotypes.RData` (use the phenotype file created by the Null Model app)
+    - Variant group files: `variants_by_gene_chr<CHR>.RData` (select all 22 chromosomes)
+  - Specify the App Settings:
+    - define_segments > Genome build: hg19
+    - aggregate_list > Aggregate type: allele
+    - assoc_aggregate > Alt Freq Max: 0.1
+    - assoc_aggregate > Memory GB: 32 (increase to make sure enough available)
+    - assoc_aggregate > Test: smmat
+    - assoc_aggregate > Weight Beta: "1 25"
+    - Output prefix: "1KG_height_smmat" (or any other string to name the output file)
+  - Click: Run
+  
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed.
+
+The output of this analysis will be 22 `<output_prefix>_smmat_chr<CHR>.RData` files with the association test results for each chromosome as well as a `<output_prefix>_smmat_manh.png` file with the Manhattan plot and a `<output_prefix>_smmat_qq.png` file with the QQ plot. 
+
+You can find the expected output of this analysis by looking at the existing task `10. 1KG SMMAT Association Test` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to look at the output.
+
+
+### Exercise 6.3 (Data Studio)
+
+After running an Application, you may want to load the results into RStudio to explore them interactively. All of the output files are saved in the directory `/sbgenomics/project-files/`. Load the chr 1 SMMAT results into RStudio and find the gene with the smallest p-value.  
+
+```{r}
+# your solution here 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+```
+
+### Solution 6.3 (Data Studio)
+
+After running an Application, you may want to load the results into RStudio to explore them interactively. All of the output files are saved in the directory `/sbgenomics/project-files/`. Load the chr 1 SMMAT results into RStudio and find the gene with the smallest p-value.  
+
+```{r, eval = FALSE}
+assoc <- get(load('/sbgenomics/project-files/1KG_height_smmat_chr1.RData'))
+names(assoc)
+
+head(assoc$results)
+
+x <- assoc$results
+x[which.min(x$pval_SMMAT), ]
+```
+
+Gene ENSG00000186510.7 has the smallest SMMAT p-value ($p = 4.8x10^{-4}$).
+
+
