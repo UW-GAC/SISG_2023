@@ -1,0 +1,96 @@
+# 6. Annotation Explorer 
+
+In this tutorial, we will learn how to use [Annotation Explorer](https://platform.sb.biodatacatalyst.nhlbi.nih.gov/u/biodatacatalyst/annotation-explorer/), an open tool available on the NHLBI BioData Catalyst powered by Seven Bridges cloud platform that eliminates the challenges of working with very large variant-level annotated datasets. Annotation Explorer has an interactive graphical user interface built on high performance databases and does not require any programming experience. We will learn how to explore and interactively query variant annotations and integrate them in GWAS analyses. 
+
+For these exercises, we will be using the open-access "GenomeWide" dataset, which contains annotations for all combinations of SNVs, including each position in the genome as well as INDELs submitted to dbSNP. 
+
+- Launch the Annotation Explorer
+  - From the top menu, click "Data" > "Annotation Explorer"
+  - Click: "Query Dataset" on the "GenomeWide" Dataset
+  - Choose the SISG Billing Group
+  - Choose the XSMALL Instance type
+  - Click: "Select"
+
+#### Post-association testing
+
+Annotation Explorer can be used **post-association testing** -- for example, to explore annotations of variants in a novel GWAS signal. Suppose we performed a GWAS and our top hit was the C>T variant on chromosome 19 at position 44908822. In the Annotation Explorer:
+
+- Click: "Add filter"
+  - Select "CHROM"
+    - Select value "19"
+      - Click: "Add"
+- Click: "Add filter"
+  - Select "POS"
+    - Select "Equals" and type in value "44908822"
+      - Click: "Add" 
+- Click: "Run query" in the top right
+
+This may take a minute to run. Once the query finishes, any variants that match the filtering criteria will be displayed. We can click the "+" icon on the right of the results to "add additional annotations" to the results:
+
+- Click: "+"
+  - Use the search to find and select "KGP_AF" (allele frequency from 1000 Genomes Project)
+  - Use the search to find and select "GWAS_catalog_rs", "GWAS_catalog_trait", and "GWAS_catalog_OR" 
+  - Use the search to find and select "CADD_phred" (variants with larger scores are more likely damaging)
+  - Click: "Add" to update the query 
+
+We can see that the C>T variant at 19:44908822
+
+- is rs7412
+- has a T allele frequency of 7.5\% in 1000 Genomes
+- has been associated with systolic blood pressure in the GWAS Catalog
+- has a CADD_phred = 26 (variants with CADD_phred > 20 are in the top 1\% of scores)
+
+
+### Exercise 6.1 (Annotation Explorer)
+
+Use the Annotation Explorer to find the rsID, the allele frequency in the 1000 Genomes Project, and the CADD_phred score for the T>A variant on chromosome 16 at position 53786615. Also, what trait is this variant associated with in the GWAS Catalog?  
+
+### Solution 6.1 (Annotation Explorer)
+
+Running Annotation Explorer, we see that the T>A variant at 16:53786615
+
+- is rs9939609
+- has an A allele frequency of 34.0\% in 1000 Genomes
+- has been associated with BMI in the GWAS Catalog
+- has a CADD_phred = 10.05
+
+
+#### Pre-association testing 
+
+Annotation Explorer can also be used **pre-association testing** -- for example, to generate annotation informed variant filtering and grouping files for aggregate testing (more on this in the Aggregate Association Tests tutorial). In the Annotation Explorer:
+
+- Click: "Add filter"
+  - Select "CHROM"
+    - Select value "22"
+      - Click: "Add"
+- Click: "Add filter"
+  - Select "CADD_phred"
+    - Select "Greater than" and type in value "20"
+      - Click: "Add" 
+- Click: "Add filter"
+  - Select "MetaSVM_score"
+    - Select "Greater than" and type in value "0.5"
+      - Click: "Add" 
+- Click: "Run query" in the top right
+
+This may take a couple of minutes to run. Once the query finishes, any variants that match the filtering criteria will be displayed. We can see that there are 138,831 matching results. We may want to group (aggregate) variants for multi-variant association tests (this is particularly useful for rare variants). A common approach is to aggregate variants by gene:
+
+- Click: "Aggregate manually"
+  - Select "Ensembl_geneid"
+
+Once the aggregation finishes, we see a histogram of the number of variants that meet our filtering criteria in each aggregation unit (i.e. unique Ensembl_geneid units). We see that 19825 (98.26% of) aggregation units have 0 variants after our filtering (it's so many because we restricted to chromosome 22). There are 151 aggregation units with $> 100$ and $\leq 1000$ variants.
+
+
+### Exercise 6.2 (Annotation Explorer)
+
+Use the Annotation Explorer to identify all variants on chromosome 22 with CADD_phred score > 30 (i.e. the top 0.1% of most likely damaging variants) and MetaSVM_score > 0.5. How many variants are selected? Aggregate the results by Ensembl_geneid. How many aggregation units have $> 100$ and $\leq 1000$ variants?
+
+### Solution 6.2 (Annotation Explorer)
+
+There are 18,411 variants that meet the filtering criteria. There are 41 aggregation units defined by Ensembl gene ID with $> 100$ and $\leq 1000$ variants. 
+
+
+#### Multi-variant association testing
+
+In the next tutorial, we will learn about multi-variant association tests. Variant annotation can be very useful for pre-selecting which variants to test in aggregate. In general, a more stringent filtering approach (e.g. CADD_phred > 30 vs. CADD_phred > 20) will reduce the number of aggregation units which have at least one variant. Often, there is not a "correct" pre-determined cut-off to implement for an annotation field to optimize association tests. Annotation Explorer enables the user to play with varying filtering criteria, which can help visualize its effects on the aggregation unit characteristics and may assist in choosing a filtering criteria in an informed way.
+
