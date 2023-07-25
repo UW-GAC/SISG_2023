@@ -76,10 +76,6 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 ## Resources
 
-NHLBI BioData Catalyst Powered by Seven Bridges
-
-- [Getting Started Guide for SISG23 Module 18](https://drive.google.com/file/d/1VjIFxEfF6tvlkIVCjFGeIiBRDmGNLbvn/view?usp=sharing)
-
 A detailed tutorial and relevant R scripts for STAAR pipeline are available at [https://github.com/xihaoli/STAARpipeline-Tutorial](https://github.com/xihaoli/STAARpipeline-Tutorial).
 
 If you are new to R, you might find the following material helpful:
