@@ -31,19 +31,19 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | Slides | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-3:45pm | Cloud Computing | Slides | |
-| 3:45pm-5:00pm | Intro to Genomic Data Structure Format | Slides | [.Rmd](https://drive.google.com/file/d/1bNtoxT9nRTqEx-nKdMGKdhZQrZjPIpZ-/view?usp=drive_link) [.html](https://drive.google.com/file/d/1pph01MKJpfvVUC-ljE_hthtSgLHe06M6/view?usp=drive_link) |
+| 3:45pm-5:00pm | Intro to Genomic Data Structure Format | Slides | [.Rmd]() [.html]() |
 
 
 **Thursday, July 27th**
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-10:00am | Single Variant Association Tests | Slides | [.Rmd](https://drive.google.com/file/d/1juLdfoeWYrHUG2xz5pn6Oc7b6Qog3bNs/view?usp=drive_link) [.html](https://drive.google.com/file/d/1E-54Nc0v_xeZacIwBi5S-FsRnEEb7Itu/view?usp=drive_link) |
+| 8:30am-10:00am | Single Variant Association Tests | Slides | [.Rmd]() [.html]() |
 | 10:00am-10:30am | _Coffee Break_ | | |
 | 10:30am-10:45am | Single Variant Association Tests (Discussion) | | |
-| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | Slides | [.Rmd](https://drive.google.com/file/d/1REJ8telpvF6KJRGrM1A6u4xncCVVTnu-/view?usp=drive_link) [.html](https://drive.google.com/file/d/1c8EXSKhcLmIv-VE7fh91_Ut72eoYGAfY/view?usp=drive_link) |
+| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | Slides | [.Rmd]() [.html]() |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
-| 1:30pm-3:00pm | Mixed Model Association Tests | Slides | [.Rmd](https://drive.google.com/file/d/1TyyJRMAAfvt4Zo6b99_o76BpmY6L6PgZ/view?usp=drive_link) [.html](https://drive.google.com/file/d/1iBAD1Q47XtbSvavRCSuWHcNb4ZlVN4JQ/view?usp=drive_link) |
+| 1:30pm-3:00pm | Mixed Model Association Tests | Slides | [.Rmd]() [.html]() |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-5:00pm | Recent Findings for WGS Studies | Slides | |
 
@@ -51,15 +51,15 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-9:15am | R shiny Apps for Exploring Results Demo | | [.Rmd](https://drive.google.com/file/d/1H7VTlGTN6LUwvgZ8r17pviKtDQyWGIA0/view?usp=drive_link) [.html](https://drive.google.com/file/d/1qj3bqI1gqu3GRInK7d9f9wy0WSQKm_9p/view?usp=drive_link) |
-| 9:15am-10:00am | Variant Annotation & Annotation Explorer | Slides | [.Rmd](https://drive.google.com/file/d/1PLM1fDNFjxV4K2lelJkTVnvgi0uPy3U6/view?usp=drive_link) [.html](https://drive.google.com/file/d/1ne7sF9QkJO3HEL-tiJaRv3CstTfy12tB/view?usp=drive_link) |
+| 8:30am-9:15am | R shiny Apps for Exploring Results Demo | | [.Rmd]() [.html]() |
+| 9:15am-10:00am | Variant Annotation & Annotation Explorer | Slides | [.Rmd]() [.html]() |
 | 10:00am-10:30am | _Coffee Break_ | | |
-| 10:30am-12:00pm | Multiple Variant Association Tests | Slides | [.Rmd](https://drive.google.com/file/d/1jUBDZrHnRNp7tUStHQ-fptiCahTIaCJW/view?usp=drive_link) [.html](https://drive.google.com/file/d/1wo4JwwHRo-1c9ZaHU8OO_EyBpsZg-u1_/view?usp=drive_link) |
+| 10:30am-12:00pm | Multiple Variant Association Tests | Slides | [.Rmd]() [.html]() |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-2:00pm | Multiple Variant Association Tests (Discussion) | | |
 | 2:00pm-3:00pm | Advanced Annotation Strategies for Association Testing | Slides | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-4:15pm | STAAR Pipeline Exercise | Slides | [.Rmd](https://drive.google.com/file/d/1cE3S8Px-RGjUVxJMTzVYeKzVP61DjlNC/view?usp=drive_link) [.html](https://drive.google.com/file/d/1BHhn2Kri8vbreQgDToXOgQltYycxBoaw/view?usp=drive_link) |
+| 3:30pm-4:15pm | STAAR Pipeline Exercise | Slides | [.Rmd]() [.html]() |
 | 4:15pm-5:00pm | Open Q&A | Slides | |
 
 ## R packages used
