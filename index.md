@@ -31,7 +31,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | [Slides](https://docs.google.com/presentation/d/1F5LznutVHVKirsvDFurh_S1aCbNHHQhCC5JPK_0_1EY/preview?slide=id.p) | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-3:45pm | Intro to Cloud Computing for WGS Analyses | [Slides](https://docs.google.com/presentation/d/1qoDoRpUvMyPtB1Y-Z9CzBHbk2wDWtsloVvD_eNDy_Uc/preview?slide=id.p) | |
-| 3:45pm-5:00pm | Intro to Genomic Data Structure Format | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.html) |
+| 3:45pm-5:00pm | Intro to Genomic Data Structure Format | [Slides](https://drive.google.com/file/d/1o2k1L5J961pTDNvLxlhK8cfmtUKDjuNl/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.html) |
 
 
 **Thursday, July 27th**
