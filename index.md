@@ -1,8 +1,6 @@
 This site contains course materials for SISG Module 18: Computational Pipeline for WGS Data, July 26-28, 2023. **Course evaluations and certificates of completion will be available via the [official SISG course web page](https://si.biostat.washington.edu/institutes/sisg/SM2318)** (requires login).
 
 - **Instructors:** Ken Rice, Laura Raffield, and Matthew Conomos
-- **TAs:** 
-- **Zoom Link:**
 - **[Join the Slack Discussion](https://uwbiostatisticssisg.slack.com/archives/C05EAUXKLUT)**
 
 ## Course Format
@@ -28,12 +26,13 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 1:30pm-1:45pm | Introduction | Slides | |
-| 1:45pm-2:30pm | Using BioData Catalyst powered by Seven Bridges | Slides | |
-| 2:30pm-3:00pm | Intro to Genomic Data Structure Format (Lecture) | Slides | |
+| 1:30pm-1:40pm | Introduction | Slides | |
+| 1:40pm-2:30pm | Association Tests: Background | Slides | |
+| 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | Slides | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-4:15pm | Intro to Genomic Data Structure Format (Exercise) | | .Rmd .html |
-| 4:15pm-5:00pm | Association Tests: Background | Slides | |
+| 3:30pm-3:45pm | Cloud Computing | Slides | |
+| 3:45pm-5:00pm | Intro to Genomic Data Structure Format | Slides | .Rmd .html |
+
 
 **Thursday, July 27th**
 
@@ -41,23 +40,27 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | --- | --- | --- | --- |
 | 8:30am-10:00am | Single Variant Association Tests | Slides | .Rmd .html |
 | 10:00am-10:30am | _Coffee Break_ | | |
-| 10:30am-12:00pm | Population Structure and Relatedness Inference for Association Studies | Slides | .Rmd .html |
+| 10:30am-10:45am | Single Variant Association Tests (Discussion) | | |
+| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | Slides | .Rmd .html |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-3:00pm | Mixed Model Association Tests | Slides | .Rmd .html |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-5:00pm | R shiny Apps for Exploring Results Demo | Slides | .Rmd .html |
+| 3:30pm-5:00pm | Recent Findings for WGS Studies | Slides | |
 
 **Friday, July 28th**
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-10:00am | Recent Findings for WGS Studies | Slides | |
+| 8:30am-9:15am | R shiny Apps for Exploring Results Demo | | .Rmd .html |
+| 9:15am-10:00am | Variant Annotation & Annotation Explorer | Slides | .Rmd .html |
 | 10:00am-10:30am | _Coffee Break_ | | |
 | 10:30am-12:00pm | Multiple Variant Association Tests | Slides | .Rmd .html |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
-| 1:30pm-3:00pm | Advanced Annotation Strategies for Association Testing | Slides | .Rmd .html |
+| 1:30pm-2:00pm | Multiple Variant Association Tests (Discussion) | | |
+| 2:00pm-3:00pm | Advanced Annotation Strategies for Association Testing | Slides | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-5:00pm | Annotation Explorer Demo | Slides | |
+| 3:30pm-4:15pm | STAAR Pipeline Exercise | Slides | .Rmd .html |
+| 4:15pm-5:00pm | Open Q&A | Slides | |
 
 ## R packages used
 
@@ -73,9 +76,9 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 NHLBI BioData Catalyst Powered by Seven Bridges
 
-- [Getting Started Guide for SISG22 Module 17](https://drive.google.com/file/d/1VjIFxEfF6tvlkIVCjFGeIiBRDmGNLbvn/view?usp=sharing)
+- [Getting Started Guide for SISG23 Module 18](https://drive.google.com/file/d/1VjIFxEfF6tvlkIVCjFGeIiBRDmGNLbvn/view?usp=sharing)
 
-A detailed tutorial and relevant R scripts for STAAR pipeline are available at [https://github.com/xihaoli/STAARpipeline-Tutorial](https://github.com/xihaoli/STAARpipeline-Tutorial). STAAR pipeline apps will also be released soon on BioData Catalyst.
+A detailed tutorial and relevant R scripts for STAAR pipeline are available at [https://github.com/xihaoli/STAARpipeline-Tutorial](https://github.com/xihaoli/STAARpipeline-Tutorial).
 
 If you are new to R, you might find the following material helpful:
 
