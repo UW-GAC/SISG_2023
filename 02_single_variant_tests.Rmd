@@ -1,0 +1,327 @@
+# 2. Single Variant Association Tests
+
+Single variant association tests are used to identify genetic variants associated with a phenotype of interest. Performing single-variant tests genome-wide is commonly referred to as a Genome Wide Association Study (GWAS). This tutorial demonstrates how to perform single variant association tests using regression models with the [GENESIS](https://bioconductor.org/packages/release/bioc/html/GENESIS.html) R/Bioconductor package. 
+
+## Prepare the Data
+
+Before we can begin our association testing procedure, we must prepare our data in the required format. GENESIS requires that phenotype data be provided as an `AnnotatedDataFrame`, which is a special data structure provided by the  [Biobase](https://www.bioconductor.org/packages/release/bioc/html/Biobase.html) R/Bioconductor package that contains both data and metadata. You should include a description of each variable in the metadata. 
+
+```{r, message = FALSE}
+library(Biobase)
+```
+
+#### Subject Phenotype Data
+
+First, we load our subject phenotype data (i.e. both the outcome and covariate data), which is currently stored in a tab separated .tsv file. We then create metadata to describe the columns of the phenotype data. Finally, we create an `AnnotatedDataFrame` by pairing the phenotype data with the metadata.
+
+```{r}
+repo_path <- "https://github.com/UW-GAC/SISG_2022/raw/main"
+if (!dir.exists("data")) dir.create("data")
+
+# load phenotype data
+phenfile <- "data/pheno_data.tsv"
+if (!file.exists(phenfile)) download.file(file.path(repo_path, phenfile), phenfile)
+phen <- read.table(phenfile, header = TRUE, sep = "\t", as.is = TRUE)
+head(phen)
+
+# create metadata
+metadata <- data.frame(labelDescription = c("subject identifier",
+                                            "population",
+                                            "super population",
+                                            "study identifier",
+                                            "sex",
+                                            "age at measurement",
+                                            "height in cm",
+                                            "outcome status 0/1"),
+                       row.names = colnames(phen))
+metadata
+
+# create the AnnotatedDataFrame
+annot <- AnnotatedDataFrame(phen, metadata)
+annot
+```
+
+We use the `pData` and `varMetaData` functions to access the data and metadata in our `AnnotatedDataFrame`, respectively.
+
+```{r}
+# access the data with the pData() function.
+head(pData(annot))
+
+# access the metadata with the varMetadata() function.
+varMetadata(annot)
+```
+
+#### Sample Identifiers 
+
+The GENESIS code to fit the regression model and perform the association tests also requires that the `AnnotatedDataFrame` have a column named `sample.id`, which represents a sample (i.e. sequencing instance) identifier. The values in the `sample.id` column must match the `sample.id` values in the GDS file(s) containing the sequencing data. 
+
+When designing a study, we generally advise using separate IDs for samples (sequencing instances) and subjects (individuals) and maintaining a sample to subject mapping file. This practice can be beneficial for quality control purposes; for example, when sample swaps are detected, the mapping between sequencing (indexed by `sample.id`) and phenotype (indexed by `subject.id`) data can easily be updated, rather than needing to modify and re-write phenotype data or sequencing metrics files.
+
+```{r}
+# load the sample subject mapping
+mapfile <- "data/sample_subject_map.tsv"
+if (!file.exists(mapfile)) download.file(file.path(repo_path, mapfile), mapfile)
+map <- read.table(mapfile, header = TRUE, sep = "\t", as.is = TRUE)
+head(map)
+```
+
+Notice that, in this example, the 1000 Genomes sample identifiers are the same as the subject identifiers (which goes against our recommendation, but is OK for these exercises). We merge the `sample.id` information into our `AnnotatedDataFrame` with the phenotype data.
+
+```{r}
+# merge the sample-subject map with the phenotype data
+dat <- merge(map, pData(annot), by = 'subject.id')
+head(dat)
+
+# add an item for `sample.id` to the metadata
+meta <- rbind(sample.id = 'sample identifier',
+              varMetadata(annot))
+meta
+
+# create a new AnnotatedDataFrame
+annot <- AnnotatedDataFrame(dat, meta)
+annot
+```
+
+Save the `AnnotatedDataFrame` for future use.
+
+```{r}
+save(annot, file = "data/sample_phenotype_annotation.RData")
+```
+
+
+## Null Model
+
+Now that our data is prepared, we can move on to the association testing procedure. The first step is to fit the "null model" -- i.e., a model fit under the null hypothesis of no individual variant association. Operationally, this is fitting a regression model with the desired outcome phenotype and fixed effect covariates.
+
+#### Fit the Null Model
+
+We use the `fitNullModel` function from GENESIS. We need to specify the `AnnotatedDataFrame` with the phenotype data, the outcome variable (height), and the fixed effect covariates (sex, age, and study). If the sample set involves multiple distinct groups with different variances for the phenotype, we recommend allowing for heterogeneous residual variance among groups with the `group.var` parameter. If you take a closer look at the data, you will see that the variance of height differs by study.
+
+```{r null_model_fit}
+library(GENESIS)
+
+# fit the null model
+nullmod <- fitNullModel(annot,
+                        outcome="height",
+                        covars=c("sex", "age", "study"),
+                        group.var="study",
+                        verbose=FALSE)
+save(nullmod, file="data/null_model.RData")
+```
+
+The `fitNullModel` function returns a lot of information about the model that was fit. We examine some of that information below; to see all of the components, try `names(nullmod)`.
+
+```{r assoc_null_model_results}
+# description of the model we fit
+nullmod$model
+
+# fixed effect regression estimates
+nullmod$fixef
+
+# residual variance estimates by group.var
+nullmod$varComp
+
+# model fit: fitted values, residuals
+head(nullmod$fit)
+
+# plot the residuals vs the fitted values
+library(ggplot2)
+ggplot(nullmod$fit, aes(x = fitted.values, y = resid.marginal)) +
+    geom_point(alpha = 0.5) +
+    geom_hline(yintercept = 0) +
+    geom_smooth(method = 'lm')
+```
+
+### Exercise 2.1 (Data Studio)
+
+As discussed in the lecture, we recommend a fully adjusted two-stage inverse Normalization procedure for fitting the null model when phenotypes have non-Normal distributions. Using the `two.stage` option in `fitNullModel`, fit a two-stage null model. Compare these residuals with the residuals from the original null model.
+
+```{r}
+# your solution here 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+```
+
+### Solution 2.1 (Data Studio)
+
+As discussed in the lecture, we recommend a fully adjusted two-stage inverse Normalization procedure for fitting the null model when phenotypes have non-Normal distributions. Using the `two.stage` option in `fitNullModel`, fit a two-stage null model. Compare these residuals with the residuals from the original null model.
+
+To run the fully adjusted two.stage null model, we simply set the `two.stage` option to `TRUE`. The `norm.option` parameter determines if the inverse Normalization should be done with all samples together (`"all"`) or within each `group.var` group separately (`"by.group"`).
+
+```{r null_model_two_stage}
+nullmod.twostage <- fitNullModel(annot,
+                                 outcome="height",
+                                 covars=c("sex", "age", "study"),
+                                 group.var="study",
+                                 two.stage = TRUE,
+                                 norm.option = "all",
+                                 verbose=FALSE)
+save(nullmod.twostage, file="data/null_model_two_stage.RData")
+
+# description of the model we fit
+nullmod.twostage$model
+
+# compare the marginal residuals
+
+# merge the data for plotting
+pdat <- merge(nullmod$fit, nullmod.twostage$fit,
+              by = 'sample.id', suffixes = c('.orig', '.twostage'))
+pdat <- merge(pdat, pData(annot), by = 'sample.id')
+head(pdat, 2)
+
+# distribution of residuals - original null model
+ggplot(pdat, aes(x = resid.marginal.orig)) +
+    geom_density(aes(color = study)) +
+    geom_density(size = 2)
+
+# distribution of residuals - two stage null model
+ggplot(pdat, aes(x = resid.marginal.twostage)) +
+    geom_density(aes(color = study)) +
+    geom_density(size = 2)
+
+# compare residuals
+ggplot(pdat, aes(x = resid.marginal.orig, y = resid.marginal.twostage, color = study)) +
+    geom_point() +
+    geom_abline(intercept = 0, slope = 1)
+
+```
+
+There is not much difference in the residual here because the distribution of height is not far from Normal to begin. See [Sofer et al. (2019)](https://onlinelibrary.wiley.com/doi/10.1002/gepi.22188) for more information on the fully adjusted two-stage model.
+
+$$\\[0.5in]$$
+
+## Single-Variant Association Tests
+
+After fitting the null model, we use score tests to test each variant across the genome separately for association with the outcome phenotype (i.e. height in our example). We use the `assocTestSingle` function from GENESIS. 
+
+#### Prepare the Iterator 
+
+First, we have to create a `SeqVarData` object linking the GDS file containing the sequencing data and the `AnnotatedDataFrame` containing the sample and phenotype data. We then create a `SeqVarBlockIterator` object, which breaks the set of all variants in the `SeqVarData` object into blocks, allowing us to analyze genome-wide in manageable pieces. 
+
+```{r, message = FALSE}
+library(SeqVarTools)
+
+gdsfile <- "data/1KG_phase3_subset_chr1.gds"
+if (!file.exists(gdsfile)) download.file(file.path(repo_path, gdsfile), gdsfile)
+gdsfmt::showfile.gds(closeall=TRUE) # make sure file is not already open
+gds <- seqOpen(gdsfile)
+
+# make the seqVarData object
+seqData <- SeqVarData(gds, sampleData=annot)
+
+# make the iterator object
+iterator <- SeqVarBlockIterator(seqData, verbose=FALSE)
+iterator
+```
+
+The `SeqVarBlockIterator` object looks a lot like the GDS objects we've seen before, but with an additional `sample.annotation` field that contains the phenotype data from the linked `AnnotatedDataFrame`.
+
+#### Run the Association Tests
+
+The `assocTestSingle` function takes the already fitted null model as input, performs score tests by iterating over all blocks of variants in the `SeqVarBlockIterator` object, and then concatenates and returns the results.
+
+```{r assoc_single, message = FALSE}
+# run the single-variant association test
+assoc <- assocTestSingle(iterator, 
+                         null.model = nullmod)
+dim(assoc)
+head(assoc)
+```
+
+Each row of the results data.frame represents one tested variant and includes: variant information (`variant.id`, `chr`, and `pos`), the number of samples tested (`n.obs`), the minor allele count (`MAC`), the effect allele frequency (`freq`), the score value (`Score`) and its standard error (`Score.SE`), the score test statistic (`Score.Stat`) and $p$-value (`Score.pval`), and an approximation of the effect allele effect size (`Est`) and its standard error (`Est.SE`). When using a `SeqVarData` object, the effect allele is the alternate allele. \n
+
+We make a QQ plot to examine the $p$-values:
+
+```{r assoc_single_qq}
+library(ggplot2)
+qqPlot <- function(pval) {
+    pval <- pval[!is.na(pval)]
+    n <- length(pval)
+    x <- 1:n
+    dat <- data.frame(obs=sort(pval),
+                      exp=x/n,
+                      upper=qbeta(0.025, x, rev(x)),
+                      lower=qbeta(0.975, x, rev(x)))
+
+    ggplot(dat, aes(-log10(exp), -log10(obs))) +
+        geom_line(aes(-log10(exp), -log10(upper)), color="gray") +
+        geom_line(aes(-log10(exp), -log10(lower)), color="gray") +
+        geom_point() +
+        geom_abline(intercept=0, slope=1, color="red") +
+        xlab(expression(paste(-log[10], "(expected P)"))) +
+        ylab(expression(paste(-log[10], "(observed P)"))) +
+        theme_bw()
+}
+
+qqPlot(assoc$Score.pval)
+```
+
+A lot of the variants we tested are very rare -- i.e., the alternate allele is not observed for many samples. Single-variant tests do not perform well for very rare variants (we discuss testing rare variants in more detail later). We can use the minor allele count (MAC) observed in the sample to filter rare variants that we may expect to have unreliable test results.
+
+```{r mac}
+summary(assoc$MAC)
+sum(assoc$MAC < 5)
+
+qqPlot(assoc$Score.pval[assoc$MAC >= 5])
+```
+
+We should expect the majority of variants to fall near the red `y=x` line in the QQ plot. The deviation above the line, commonly referred to as "inflation" is indicative of some model issue. In this example, the issue is likely driven by the fact that we've ignored genetic ancestry and relatedness among these subjects -- more to come later when we discuss mixed models.
+
+### Exercise 2.2 (Data Studio)
+
+GENESIS also supports testing binary (e.g. case/control) outcomes. We can fit a null model using logistic regression by specifying the argument `family=binomial` in the `fitNullModel` function. Use the `status` column in the sample annotation to fit a null model for simulated case/control status, with `sex` and `pop` as covariates. Run single-variant association tests using this model and make a QQ plot of all variants with MAC >= 5.
+
+```{r}
+# your solution here 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+```
+
+### Solution 2.2 (Data Studio)
+
+GENESIS also supports testing binary (e.g. case/control) outcomes. We can fit a null model using logistic regression by specifying the argument `family=binomial` in the `fitNullModel` function. Use the `status` column in the sample annotation to fit a null model for simulated case/control status, with `sex` and `pop` as covariates. Run single-variant association tests using this model and make a QQ plot of all variants with MAC >= 5.
+
+When testing binary outcomes, we should fit our null model using logistic regression. To do so, we simply set the argument `family=binomial` in `fitNullModel`. Note that the parameter `group.var` is no longer relevant here, as the logistic model specifies the mean-variance relationship.
+
+```{r exercise_logistic}
+# fit the null model with logistic regression
+nullmod.status <- fitNullModel(annot,
+                               outcome="status",
+                               covars=c("sex", "pop"),
+                               family=binomial,
+                               verbose=FALSE)
+
+# reset the iterator since we used it in the prior analysis
+resetIterator(iterator, verbose=FALSE)
+
+# run the single-variant association test
+assoc.status <- assocTestSingle(iterator, 
+                                null.model = nullmod.status, 
+                                test="Score")
+dim(assoc.status)
+head(assoc.status)
+
+# make a QQ plot
+qqPlot(assoc.status$Score.pval[assoc.status$MAC >= 5])
+```
+
+Extra: in samples with highly imbalanced case:control ratios, the Score test can perform poorly for low frequency variants. Saddlepoint approximation (SPA) can be used to improve p-value calculations, and is available in GENESIS by setting the argument `test=Score.SPA` in `assocTestSingle`. See [Dey et al. (2017)](https://www.cell.com/ajhg/fulltext/S0002-9297(17)30201-X) and [Zhou et al. (2018)](https://www.nature.com/articles/s41588-018-0184-y) for details on using SPA in GWAS.
+
+```{r assoc_close1}
+# close the GDS file!
+seqClose(seqData)
+```
