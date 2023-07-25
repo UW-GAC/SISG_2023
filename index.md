@@ -41,11 +41,11 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | 8:30am-10:00am | Single Variant Association Tests | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.html) |
 | 10:00am-10:30am | _Coffee Break_ | | |
 | 10:30am-10:45am | Single Variant Association Tests (Discussion) | | |
-| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.html) |
+| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | [Slides](https://drive.google.com/file/d/1rbcL7R3hut5OsEpB_e8Om1gdTXdQdGoJ/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-3:00pm | Mixed Model Association Tests | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.html) |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-5:00pm | Recent Findings for WGS Studies | Slides | |
+| 3:30pm-5:00pm | Recent Findings and Resources for WGS Studies | [Slides](https://docs.google.com/presentation/d/1dwRILfGhTn5Yse2sP30zNLLir9RQLJKi/edit?usp=drive_link&ouid=113692822881048210777&rtpof=true&sd=true) | |
 
 **Friday, July 28th**
 
@@ -57,7 +57,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | 10:30am-12:00pm | Multiple Variant Association Tests | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-2:00pm | Multiple Variant Association Tests (Discussion) | | |
-| 2:00pm-3:00pm | Advanced Annotation Strategies for Association Testing | Slides | |
+| 2:00pm-3:00pm | Advanced Annotation Strategies for Association Testing | [Slides](https://docs.google.com/presentation/d/1Apc7JrJCvwei5iaCS8O5uX9j-UUIHM46/edit?usp=drive_link&ouid=113692822881048210777&rtpof=true&sd=true) | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-4:15pm | STAAR Pipeline Exercise | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/08_STAAR.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/08_STAAR.html) |
 | 4:15pm-5:00pm | Open Q&A | Slides | |
