@@ -1,0 +1,166 @@
+# 8. STAAR Pipeline
+
+The STAAR pipeline provides practical options for rare variant analysis for whole genome and exome sequencing data, including when related participants are included in an analysis. STAAR makes it easy to incorporate functional annotation from the FAVOR database into multiple-variant aggregate association tests. You can also provide your own annotations and customize the pipeline for your tissue of interest; here we use the standard FAVOR database annotation strategy, as described in accompanying lecture and the published paper. 
+
+#### STAAR Pipeline Applications
+
+These apps run phenotype-genotype association analyses for biobank-scale whole-genome/whole-exome sequencing data. 
+
+The first app `STAARpipeline` will:
+
+1. Fit the null model. This is fitting your model with your outcome, adjustments, and kinship/genetic relatedness matrix, but does not use the genotypes
+2. Take the null model object from the first step and run your association analysis, while dynamically incorporating multiple functional annotations to empower rare variant (set) association analysis using the STAAR method. 
+
+The same null model can be used for single variant or aggregate tests. 
+
+The second app `STAARpipelineSummary VarSet` takes the single variant or aggregate test results generated from the `STAARpipeline` app, and will:
+
+1. Summarize these results across all chromosomes and create a unified list of results
+2. Perform conditional analysis for (unconditionally) significant single variants or variant sets by adjusting for a given list of known variants
+
+The third app `STAARpipelineSummary IndVar` will:
+
+1. Extract information (summary statistics) of individual variants from a user-specified variant set (gene category or genetic region) in the analytical follow-up of `STAARpipeline`.
+
+This pipeline is described in detail at PMID 36303018. It has been applied in a number of application papers as well, including PMID 36220816, 37253714. 
+
+#### FAVOR
+
+The FAVOR reference files to annotate a given GDS file to an aGDS file are located under “FAVOR Essential Database” here:
+https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/1VGTJI  
+
+These files have already been provided to you in the BioData Catalyst project, but you may need them in future. Public tutorial/manual files are also available https://docs.google.com/document/d/1l-fCmuey7HnrUxx2U67_bgwRrtyWyuSu98I3YXoTZoE/edit, https://github.com/xihaoli/STAARpipeline-Tutorial. 
+
+
+## Sliding Window Tests
+
+We will use the `STAARpipeline` apps on the BioData Catalyst powered by Seven Bridges platform to perform sliding window tests for variants with an allele frequency $<1\%$. The steps to perform this analysis are as follows:
+
+- Copy the relevant apps to your project if it is not already there:
+  - Click: Public Resources > Workflows and Tools > Browse
+  - Search for `STAAR`. You need all 4 apps listed below:
+    - FAVORannotator
+    - STAARpipeline
+    - STAARpipelineSummary VarSet
+    - STAARpipelineSummary IndVar
+  - Click: Copy > Select your project > Copy
+
+### Exercise 8.1 (Application)
+
+First, run the `FAVORannotator` app on an example GDS file -- perhaps chromosome 19. This app runs one chromosome at a time. 
+
+- Run the analysis in your project:
+  - Click: Apps > `FAVORannotator` > Run
+  - Specify the Inputs:
+    - GDS file: `1KG_phase3_subset_1KG_phase3_subset_chr19_pruned.gds`
+    - FAVOR database for specific chromosome: `FAVOR_chr19.tar.gz` (provided at link above by STAAR package creators)
+    - FAVORdatabase_chrsplit CSV file: `FAVORdatabase_chrsplit.csv` (provided at link above by STAAR package creators)
+  - Specify the App Settings:
+    - Chromosome: 19
+    - Output file prefix: "1KG_phase3_subset_1KG_phase3_subset_chr19_pruned_favor" (or any other string to name the output file)
+    
+Note: other app setting defaults will not need to be changed for our example, but could be altered depending on cohort size, etc. 
+
+Then, as this task will otherwise take half an hour to run, do not run the task. The output of this task would be an annotated GDS file named `<output_prefix>.gds`. You can find the expected output of this task by looking at the existing task `11. STAARexercise_FAVORannotator_chr19_example` in the Tasks menu of your Project. We will utilize the pre-provided output file available in the Project for the next steps. 
+
+### Exercise 8.2 (Application)
+
+Next, run `STAARpipeline`. We will focus on a sliding window test for this exercise, but options also exist for gene-centric coding and noncoding tests and tests per ncRNA. This single application (`STAARpipeline`) includes options for running an initial null model, as well as multiple types of aggregate tests ("Gene_Centric_Coding", "Gene_Centric_Noncoding", "ncRNA", "Sliding_Window"). Note, there is an option to run single variant tests within STAAR and summarize them, but this is very similar to GENESIS pipeline already covered, so is not a part of this exercise.
+
+- First, generate an appropriate null model:
+  - Click: Apps > `STAARpipeline` > Run
+  - Specify the Inputs:
+    - GDS files: `1KG_phase3_subset_1KG_phase3_subset_chr19_pruned_favor.gds` (in a real analysis, you would select all 22 chromosomes)
+    - Annotation name catalog: `Annotation_name_catalog.csv`
+    - Phenotype file: `mock_phenotype_SISG.csv`
+  - Specify the App Settings:
+    - Phenotype: phenotype
+    - Covariates: age, sex (again, in a real analysis, you would want to include a kinship matrix and ancestry principal components)
+    - Test type: Null
+    - Output file prefix: "chr19_region_null" (or any other string to name the output file)
+  - Click: Run
+  
+Note: you do not need to provide a variant grouping file, variant annotations are already included in the annotated GDS. 
+
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed. 
+
+The output file for this null model task is `<output_prefix>.Rdata`, a null model data object.
+
+You can find the expected output of this analysis by looking at the existing task `12. STAARexercise_nullmodel_chr19` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to look at the output.
+
+
+### Exercise 8.3 (Application)
+
+- Next, run a sliding window aggregate test (5 kb window).
+  - Click: Apps > `STAARpipeline` > Run
+  - Specify the Inputs:
+    - GDS files: `1KG_phase3_subset_1KG_phase3_subset_chr19_pruned_favor.gds`
+    - Annotation name catalog: `Annotation_name_catalog.csv`
+    - Null model: `chr19_region_null.Rdata`
+  - Specify App Settings:
+    - Sliding window size (bp) to be used in sliding window test: 5000
+    - Output file prefix: "region_sliding_5kb_chr19" (or any other string to name the output file)
+    - Test type: Sliding_Window
+  - Click: Run
+  
+Note: we will utilize the default allele frequency setting (max MAF $1\%$), and are running the pipeline on single nucleotide variants or SNVs only (indels would likely be included too in a real analysis). Mean values are used for missing genotypes by default.
+
+The analysis will take ~10 minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed. 
+
+The output from this task is `<output_prefix>.Rdata`, which contains the STAAR association results.
+
+You can find the expected output of this analysis by looking at the existing task `13. STAARexercise_STAARpipeline_run_sliding_5kb` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to look at the output.
+
+
+### Exercise 8.4 (Application)
+
+The output file for these association tests using STAAR is an `.RData` file. To convert to more human readable formats, and split different types of tests (LOF vs missense for coding tests, for example) into different `.Rdata` objects, use the `STAARpipelineSummary VarSet` app.  
+
+  - Click: Apps > `STAARpipelineSummary VarSet` > Run
+  - Specify the Inputs:
+    - Annotation name catalog: `Annotation_name_catalog.csv`
+    - Input array results: `region_sliding_5kb_chr19.Rdata`
+  - Specify App Settings: 
+    - Output file prefix: "result_sliding_5kb_chr19" (or any other string to name the output file)
+    - Prefix of input results: "region_sliding_5kb_chr"
+    - Test type: Sliding_Window
+  - Click: Run
+
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed. 
+
+You can find the expected output of this analysis by looking at the existing task `14. STAARexercise_STAARpipelineSummary_VarSet_sliding5kb` in the Tasks menu of your Project. The output files are available in the Project, so you do not need to wait for your analysis to finish to look at the output.
+
+The output from this task is `<output_prefix>_results_sliging_window_genome.Rdata` and `<output_prefix>_results_sliging_window_genome_sig.csv`. Do note that the second file "sig", i.e. significant test files in this analysis, are empty - which is good/anticipated with a randomly generated phenotype!
+
+We can also use the `STAARpipelineSummary VarSet` app to adjust for a list of known variants we would like to condition our analysis on (i.e. include as a covariate) in order to determine if our identified rare variant signals are independent of such known single variants. Files of significant "cond" results will then appear. If you use this option, note you would need to input `null_obj_file`, `agds_file_name`, and `agds_files` across all chromosomes at once (the app is not intended to be run across a single chromosome and will fail if a file for each autosome is not found). 
+
+### Exercise 8.5 (Application)
+
+You can also use the `STAARpipelineSummary IndVar` App to examine the individual variants which contribute to an aggregate test. We here examine one of the regions tested in the 5 kb sliding window test. Do note that individual variant $p$-values with a very low minor allele count (say less than 5) are likely quite unstable and may not be useful. This can still be a useful type of annotation for your results however. 
+
+  - Click: Apps > `STAARpipelineSummary IndVar` > Run
+  - Specify the Inputs:
+    - Annotation name catalog: `Annotation_name_catalog.csv`
+    - AGDS file: `1KG_phase3_subset_1KG_phase3_subset_chr19_pruned_favor.gds`
+    - Null model: `chr19_region_null.Rdata`
+  - Specify App Settings: 
+    - Chromosome: 19
+    - End location: 45668803
+    - Output file prefix: "slidingwindow_indvar_19_45663804" (or any other string to name the output file)
+    - Start location: 45663804
+    - Test type: Sliding_Window
+  - Click: Run
+
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project to check on its progress and see the results once it has completed.
+
+The output from this analysis will be `<output_prefix>csv`.
+
+You can find the expected output of this analysis by looking at the existing task `15. STAARexercise_STAARpipelineSummary_IndVar` in the Tasks menu of your Project.  The output files are available in the Project, so you do not need to wait for your analysis to finish to look at the output.
+
+
+## Gene-centric Tests
+
+While it takes a bit too long to run for an in class exercise, you can also check out results for a gene-centric coding variant mask (similar gene-centric noncoding variant masks could also be run) using a less sparse genotype file than what we have usually used in this class. The example tasks are `STAARexercise_example_STAARpipeline_gene_centric_coding` and `STAARexercise_example_STAARpipelineSummary_VarSet_genebased`. The output files in the Project have the prefix "output_full_gene_centric_coding_chr19". We also used the IndVar application to explore variants contributing to the coding gene-based test for DNMT1. See task `STAARexercise_example_STAARpipelineSummary_IndVar_gene_centric`. These example tasks use a provided annotated GDS file, produced using FAVORannotator using a similar pipeline to above, `test_1000G_chr19.gds`. 
+
+
+
