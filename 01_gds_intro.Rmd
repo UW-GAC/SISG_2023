@@ -1,0 +1,235 @@
+# 1. Introduction to GDS Format
+
+This tutorial introduces Genomic Data Structure (GDS), which is a storage format that can efficiently store genomic data and provide fast random access to subsets of the data. For more information on GDS for sequence data, see the [SeqArray package vignette](https://github.com/zhengxwen/SeqArray/blob/master/vignettes/SeqArrayTutorial.Rmd).
+
+## Convert a VCF to GDS
+
+To use the R packages developed at the University of Washington Genetic Analysis Center for sequence data, we first need to convert a VCF file to GDS. (If the file is BCF, use [https://samtools.github.io/bcftools/bcftools.html](bcftools) to convert to VCF.)
+
+```{r vcf2gds, message = FALSE}
+library(SeqArray)
+repo_path <- "https://github.com/UW-GAC/SISG_2022/raw/main"
+if (!dir.exists("data")) dir.create("data")
+
+# file path to the VCF file to *read* data from 
+vcffile <- "data/1KG_phase3_subset_chr1.vcf.gz"
+if (!file.exists(vcffile)) download.file(file.path(repo_path, vcffile), vcffile)
+
+# file path to *write* the output GDS file to 
+gdsfile <- "data/1KG_phase3_subset_chr1.gds"
+
+# convert the VCF to GDS
+seqVCF2GDS(vcffile, gdsfile, fmt.import="GT", storage.option="LZMA_RA")
+```
+
+## Exploring a GDS File
+
+#### Open a GDS
+
+We can interact with the GDS file using the [SeqArray R package](https://bioconductor.org/packages/release/bioc/html/SeqArray.html). The first thing we need to do is open a connection to a GDS file on disk using the `seqOpen` function. 
+
+```{r seqarray}
+# open a connection to the GDS file
+gds <- seqOpen(gdsfile)
+gds
+```
+
+#### Reading Data
+
+The `seqGetData` function is the basic function for reading in data from a GDS file
+```{r seqGetData}
+# the unique sample identifier comes from the VCF header
+sample.id <- seqGetData(gds, "sample.id")
+length(sample.id)
+head(sample.id)
+
+# a unique integer ID is assigned to each variant
+variant.id <- seqGetData(gds, "variant.id")
+length(variant.id)
+head(variant.id)
+
+chr <- seqGetData(gds, "chromosome")
+head(chr)
+
+pos <- seqGetData(gds, "position")
+head(pos)
+
+id <- seqGetData(gds, "annotation/id")
+head(id)
+```
+
+There are additional useful functions for summary level data.
+
+```{r minor_freq}
+# minor allele frequency of each variant
+maf <- seqAlleleFreq(gds, minor = TRUE)
+head(maf)
+summary(maf)
+hist(maf, breaks=50)
+```
+
+#### Data Filters
+
+We can define a filter on the `gds` object. After using the `seqSetFilter` command, all subsequent reads from the `gds` object are restricted to the selected subset of data, until a new filter is defined or `seqResetFilter` is called to clear the filter.
+
+```{r filter}
+seqSetFilter(gds, variant.id=91:100, sample.id=sample.id[1:5])
+```
+
+```{r var.id}
+# only returns data for the filtered variants
+seqGetData(gds, "variant.id")
+```
+
+#### Genotype Data
+
+Genotype data is stored in a 3-dimensional array, where the first dimension is always length 2 for diploid genotypes. The second and third dimensions are samples and variants, respectively. The values of the array denote alleles: `0` is the reference allele and `1` is the alternate allele. For multiallelic variants, other alternate alleles are represented as integers `> 1`.
+
+```{r genotypes}
+geno <- seqGetData(gds, "genotype")
+dim(geno)
+# print the first two variants
+geno[,,1:2]
+```
+
+The [SeqVarTools R package](http://bioconductor.org/packages/SeqVarTools) has some additional functions for interacting with SeqArray-format GDS files. There are functions providing more intuitive ways to read in genotypes. What does each of the following functions return?
+
+```{r seqvartools_geno}
+library(SeqVarTools)
+
+# return genotypes in matrix format
+getGenotype(gds)
+getGenotypeAlleles(gds)
+refDosage(gds)
+altDosage(gds)
+```
+
+#### Variant Information 
+
+There are functions to extract variant-level information. 
+
+```{r seqvartools_varinfo}
+# look at reference and alternate alleles
+refChar(gds)
+altChar(gds)
+
+# data.frame of variant information
+variantInfo(gds)
+```
+
+We can also return variant information as a `GRanges` object from the [GenomicRanges package](https://bioconductor.org/packages/release/bioc/manuals/GenomicRanges/man/GenomicRanges.pdf). This format for representing sequence data is common across many Bioconductor packages. Chromosome is stored in the `seqnames` column. The `ranges` column has variant position, which can be a single base pair or a range. We will use `GRanges` objects when we analyze sets of variants (e.g. in genes).
+
+```{r granges}
+# reset the filter to all variants and samples
+seqResetFilter(gds)
+
+gr <- granges(gds)
+gr
+```
+
+#### Multi-allelic Variants
+
+We can use the number of alleles present at each variant to identify multi-allelic variants.
+
+```{r multi-allelic}
+# how many alleles for each variant?
+n <- seqNumAllele(gds)
+table(n)
+
+# some variants have more than one alternate allele
+multi.allelic <- which(n > 2)
+altChar(gds)[multi.allelic]
+```
+
+#### Close a GDS
+
+Always use the `seqClose` command to close your connection to a GDS file when you are done working with it. Trying to open an already opened GDS will result in an error. 
+
+```{r intro_close}
+seqClose(gds)
+```
+
+
+### Exercise 1.1 (Data Studio)
+
+Open the GDS file you created above. Set a filter selecting only multi-allelic variants. Inspect the genotypes using the different methods you learned above. Try the `expandedAltDosage` function -- what does this return? You can also use the `alleleDosage` method to find dosage for the reference allele and each (i.e. first, second, third) of the alternate alleles separately.
+
+```{r}
+# your solution here 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+```
+
+### Solution 1.1 (Data Studio)
+
+Open the GDS file you created above. Set a filter selecting only multi-allelic variants. Inspect the genotypes using the different methods you learned above. Try the `expandedAltDosage` function -- what does this return? You can also use the `alleleDosage` method to find dosage for the reference allele and each (i.e. first, second, third) of the alternate alleles separately.
+
+```{r exercise_gds}
+# open a connection to the GDS file again
+gds <- seqOpen(gdsfile)
+
+# set your filter (we can use the indicator we created for multi.allelic variants from above)
+seqSetFilter(gds, variant.sel=multi.allelic)
+
+# inspect the genotypes
+geno <- seqGetData(gds, "genotype")
+dim(geno)
+geno[,1:5,1:5]
+
+geno <- getGenotype(gds)
+dim(geno)
+head(geno)
+
+geno <- getGenotypeAlleles(gds)
+head(geno)
+
+# count of *each* of the alternate alleles separately
+# returns multiple columns per variant
+dos <- expandedAltDosage(gds)
+head(dos)
+
+# count of the reference allele 
+dos <- alleleDosage(gds, n=0)
+head(dos)
+
+# count of the first alternate allele 
+dos <- alleleDosage(gds, n=1)
+head(dos)
+
+# count of the third alternate allele
+dos <- alleleDosage(gds, n=3)
+head(dos)
+```
+
+Don't forget to close your connection to the GDS file when you're done!
+
+```{r exercise_close}
+seqClose(gds)
+```
+
+### Exercise 1.2 (Application)
+
+The Apps on the BioData Catalyst powered by Seven Bridges platform allow you to easily scale up cloud computing to running analyses on all chromosomes genome-wide and with larger samples. Use the `VCF to GDS Converter` app to convert the example 1000 Genomes files into GDS files. The steps to perform this analysis are as follows:
+
+- Copy the app to your project if it is not already there:
+  - Click: Public Gallery > Apps > Browse
+  - Search for `VCF to GDS Converter`
+  - Click: Copy > Select your project > Copy
+- Run the analysis in your project:
+  - Click: Apps > `VCF to GDS Converter` > Run
+  - Specify the Inputs:
+    - Variants Files: `1KG_phase3_subset_chr<CHR>.vcf.gz` (select all 22 chromosomes)
+  - Specify the App Settings:
+    - check GDS: No
+  - Click: Run
+  
+The analysis will take a few minutes to run. You can find your analysis in the Tasks menu of your Project. Use the "View stats & logs" button to check on the status of your tasks. The output of this analysis will be a set of 22 GDS files, one per chromosome. 
+
+You can find the expected output of this analysis by looking at the existing task `01. Convert 1KG VCF to GDS` in the Tasks menu of your Project.
