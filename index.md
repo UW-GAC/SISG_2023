@@ -44,7 +44,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | [Slides](https://drive.google.com/file/d/1rbcL7R3hut5OsEpB_e8Om1gdTXdQdGoJ/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-1:45pm | Population Structure and Relatedness Inference (Discussion) | | |
-| 1:45pm-3:00pm | Mixed Model Association Tests | [Slides](https://drive.google.com/file/d/1stIM_xknIfJUJwUl3LMJo5zNaBxv5kpD/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.html) |
+| 1:45pm-3:00pm | Mixed Model Association Tests | [Slides](https://drive.google.com/file/d/1WAcNmiPcWYxzy5BeNKJybKFpj0G_BoKE/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.html) |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-4:00pm | Mixed Model Association Tests (Discussion) |
 | 4:00pm-4:45pm | R shiny Apps for Exploring Results Demo | | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/05_exploring_association_results.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/05_exploring_association_results.html) |
