@@ -54,7 +54,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-10:00am | Recent Findings and Resources for WGS Studies | [Slides](https://docs.google.com/presentation/d/1dwRILfGhTn5Yse2sP30zNLLir9RQLJKi/preview?pli=1&slide=id.p1) | |
+| 8:30am-10:00am | Recent Findings and Resources for WGS Studies | [Slides](https://drive.google.com/file/d/1WXUk6tKx8QFvw7p0F-rsLkd7wozDhAfe/view?usp=drive_link) | |
 | 10:00am-10:30am | _Coffee Break_ | | |
 | 10:30am-12:00pm | Multiple Variant Association Tests | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
