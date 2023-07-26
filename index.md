@@ -26,7 +26,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 1:30pm-1:40pm | Introduction | Slides | |
+| 1:30pm-1:40pm | Introduction | [Slides](https://docs.google.com/presentation/d/1BNGORJg6zPxQXQTt2Mdza_oIVjGMs4vCgdqdHICDw7E/preview?slide=id.p) | |
 | 1:40pm-2:30pm | Association Tests: Background | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | |
 | 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | [Slides](https://docs.google.com/presentation/d/1F5LznutVHVKirsvDFurh_S1aCbNHHQhCC5JPK_0_1EY/preview?slide=id.p) | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
