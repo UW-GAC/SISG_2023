@@ -27,7 +27,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
 | 1:30pm-1:40pm | Introduction | [Slides](https://docs.google.com/presentation/d/1BNGORJg6zPxQXQTt2Mdza_oIVjGMs4vCgdqdHICDw7E/preview?slide=id.p) | |
-| 1:40pm-2:30pm | Association Tests: Background | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | |
+| 1:40pm-2:30pm | Association Tests: Background | [Slides](https://drive.google.com/file/d/1FTVpepqH6Hu5vQTzK1CQgZAFxuAIYDhT/view?usp=drive_link) [Recording](https://drive.google.com/file/d/1kQdjcZrVG6RrX3tA8XWCtT0r3Zf6cKGQ/view?usp=sharing) | |
 | 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | [Slides](https://docs.google.com/presentation/d/1F5LznutVHVKirsvDFurh_S1aCbNHHQhCC5JPK_0_1EY/preview?slide=id.p) [Recording](https://drive.google.com/file/d/1fZAgJ4tVk6uHPTmt-V4SV5DrY_hTog8q/view?usp=drive_link) | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-3:50pm | Intro to Cloud Computing for WGS Analyses | [Slides](https://docs.google.com/presentation/d/1qoDoRpUvMyPtB1Y-Z9CzBHbk2wDWtsloVvD_eNDy_Uc/preview?slide=id.p) [Recording](https://drive.google.com/file/d/1Hc8kMMtNc17lNMVaM_HIq-6SdPVHAn30/view?usp=drive_link) | |
@@ -38,7 +38,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 
 | Time | Topic | Lecture | Exercises/Discussion |
 | --- | --- | --- | --- |
-| 8:30am-10:00am | Single Variant Association Tests | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | [Slides](https://drive.google.com/file/d/1m2AT0qd04H1Z28qXlc9Miec2eGIZ22k6/view?usp=drive_link) [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.html) |
+| 8:30am-10:00am | Single Variant Association Tests | [Slides](https://drive.google.com/file/d/1FTVpepqH6Hu5vQTzK1CQgZAFxuAIYDhT/view?usp=drive_link) | [Slides](https://drive.google.com/file/d/1m2AT0qd04H1Z28qXlc9Miec2eGIZ22k6/view?usp=drive_link) [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.html) |
 | 10:00am-10:30am | _Coffee Break_ | | |
 | 10:30am-10:45am | Single Variant Association Tests (Discussion) | | |
 | 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | [Slides](https://drive.google.com/file/d/1W6bnHJa-U-NVQ3_pefan0oVWxEnWG_Lq/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.html) |
@@ -56,7 +56,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | --- | --- | --- | --- |
 | 8:30am-10:00am | Recent Findings and Resources for WGS Studies | [Slides](https://drive.google.com/file/d/1WXUk6tKx8QFvw7p0F-rsLkd7wozDhAfe/view?usp=drive_link) | |
 | 10:00am-10:30am | _Coffee Break_ | | |
-| 10:30am-12:00pm | Multiple Variant Association Tests | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.html) |
+| 10:30am-12:00pm | Multiple Variant Association Tests | [Slides](https://drive.google.com/file/d/1FTVpepqH6Hu5vQTzK1CQgZAFxuAIYDhT/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-2:00pm | Multiple Variant Association Tests (Discussion) | | |
 | 2:00pm-3:00pm | Variant Annotation & Annotation Explorer | Slides | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/06_annotation_explorer.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/06_annotation_explorer.html) |
