@@ -28,10 +28,10 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | --- | --- | --- | --- |
 | 1:30pm-1:40pm | Introduction | [Slides](https://docs.google.com/presentation/d/1BNGORJg6zPxQXQTt2Mdza_oIVjGMs4vCgdqdHICDw7E/preview?slide=id.p) | |
 | 1:40pm-2:30pm | Association Tests: Background | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | |
-| 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | [Slides](https://docs.google.com/presentation/d/1F5LznutVHVKirsvDFurh_S1aCbNHHQhCC5JPK_0_1EY/preview?slide=id.p) | |
+| 2:30pm-3:00pm | Getting Started with BioData Catalyst powered by Seven Bridges | [Slides](https://docs.google.com/presentation/d/1F5LznutVHVKirsvDFurh_S1aCbNHHQhCC5JPK_0_1EY/preview?slide=id.p) [Recording](https://drive.google.com/file/d/1fZAgJ4tVk6uHPTmt-V4SV5DrY_hTog8q/view?usp=drive_link) | |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
-| 3:30pm-3:50pm | Intro to Cloud Computing for WGS Analyses | [Slides](https://docs.google.com/presentation/d/1qoDoRpUvMyPtB1Y-Z9CzBHbk2wDWtsloVvD_eNDy_Uc/preview?slide=id.p) | |
-| 3:50pm-5:00pm | Intro to Genomic Data Structure Format | [Slides](https://drive.google.com/file/d/1o2k1L5J961pTDNvLxlhK8cfmtUKDjuNl/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.html) |
+| 3:30pm-3:50pm | Intro to Cloud Computing for WGS Analyses | [Slides](https://docs.google.com/presentation/d/1qoDoRpUvMyPtB1Y-Z9CzBHbk2wDWtsloVvD_eNDy_Uc/preview?slide=id.p) [Recording](https://drive.google.com/file/d/1Hc8kMMtNc17lNMVaM_HIq-6SdPVHAn30/view?usp=drive_link) | |
+| 3:50pm-5:00pm | Intro to Genomic Data Structure Format | [Slides](https://drive.google.com/file/d/1o2k1L5J961pTDNvLxlhK8cfmtUKDjuNl/view?usp=drive_link) [Recording](https://drive.google.com/file/d/1Hc8kMMtNc17lNMVaM_HIq-6SdPVHAn30/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/01_gds_intro.html) |
 
 
 **Thursday, July 27th**
@@ -41,10 +41,10 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | 8:30am-10:00am | Single Variant Association Tests | [Slides](https://drive.google.com/file/d/1AOCXrMpmUWErQt3BhXVM1ePGOJxvgruz/view?usp=drive_link) | [Slides](https://drive.google.com/file/d/1m2AT0qd04H1Z28qXlc9Miec2eGIZ22k6/view?usp=drive_link) [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/02_single_variant_tests.html) |
 | 10:00am-10:30am | _Coffee Break_ | | |
 | 10:30am-10:45am | Single Variant Association Tests (Discussion) | | |
-| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | [Slides](https://drive.google.com/file/d/1rbcL7R3hut5OsEpB_e8Om1gdTXdQdGoJ/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.html) |
+| 10:45am-12:00pm | Population Structure and Relatedness Inference for Association Studies | [Slides](https://drive.google.com/file/d/1W6bnHJa-U-NVQ3_pefan0oVWxEnWG_Lq/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/03_pop_structure_relatedness.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-1:45pm | Population Structure and Relatedness Inference (Discussion) | | |
-| 1:45pm-3:00pm | Mixed Model Association Tests | [Slides](https://drive.google.com/file/d/1WAcNmiPcWYxzy5BeNKJybKFpj0G_BoKE/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.html) |
+| 1:45pm-3:00pm | Mixed Model Association Tests | [Slides](https://drive.google.com/file/d/1WGaYQ-nO2A5UN5T9k7ywXm-a_IyfVHuD/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/04_mixed_models.html) |
 | 3:00pm-3:30pm | _Coffee Break_ | | |
 | 3:30pm-4:00pm | Mixed Model Association Tests (Discussion) |
 | 4:00pm-4:45pm | R shiny Apps for Exploring Results Demo | | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/05_exploring_association_results.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/05_exploring_association_results.html) |
