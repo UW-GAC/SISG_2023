@@ -56,7 +56,7 @@ NOTE: All times are Pacific Daylight Time (GMT-07:00)
 | --- | --- | --- | --- |
 | 8:30am-10:00am | Recent Findings and Resources for WGS Studies | [Slides](https://drive.google.com/file/d/1tgayx-ZG3rLXOz-FEKUl9VGBjM1QnrCI/view?usp=drive_link) | |
 | 10:00am-10:30am | _Coffee Break_ | | |
-| 10:30am-12:00pm | Multiple Variant Association Tests | [Slides](https://drive.google.com/file/d/1FTVpepqH6Hu5vQTzK1CQgZAFxuAIYDhT/view?usp=drive_link) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.html) |
+| 10:30am-12:00pm | Multiple Variant Association Tests | [Slides](https://drive.google.com/file/d/1FTVpepqH6Hu5vQTzK1CQgZAFxuAIYDhT/view?usp=drive_link) | [Slides](https://drive.google.com/file/d/1IUCREkGothJjg5lrRGkL24qBos0ZXB-4/view?usp=drive_link) [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/07_aggregate_tests.html) |
 | 12:00pm-1:30pm | _Lunch Break_ | | |
 | 1:30pm-2:00pm | Multiple Variant Association Tests (Discussion) | | |
 | 2:00pm-3:00pm | Variant Annotation & Annotation Explorer | [Slides](https://docs.google.com/presentation/d/1e-79wkrvXTr1t4XcFV13S4qWX5V-YOqnwZZuIsDac9M/preview?slide=id.p) | [.Rmd](https://github.com/UW-GAC/SISG_2023/blob/main/06_annotation_explorer.Rmd) [.html](https://htmlpreview.github.io/?https://github.com/UW-GAC/SISG_2023/blob/main/06_annotation_explorer.html) |
